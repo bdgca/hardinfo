@@ -11,7 +11,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/StackExchange/wmi"
+	"github.com/yusufpapurcu/wmi"
 	"golang.org/x/sys/windows"
 )
 
@@ -29,6 +29,10 @@ func PrintHardInfo() {
 	fmt.Printf("%s:%s\n", "系统版本信息", GetSystemVersion())
 	fmt.Printf("%s:%s\n", "用户信息", GetUserName())
 	fmt.Printf("%s\n", "硬盘信息:")
+	dd := GetDiskDriverInfo()
+	for _, d := range dd {
+		fmt.Printf("名称:%s,序列号:%s,总空间:%.2fGB \n\n", d.Caption, d.SerialNumber, float64(d.Size)/1024/1024/1024)
+	}
 	fmt.Printf("%8s %16s %16s %16s\n", "盘符", "总空间(GB)", "剩余空间(GB)", "剩余比例(%)")
 	for _, hd := range GetDiskInfo() {
 		fmt.Printf("%10s %18.2f %18.2f %18.02f\n", hd.Path, float64(hd.Total)/1024/1024/1024, float64(hd.Free)/1024/1024/1024, float64(hd.Free)/float64(hd.Total)*100)
@@ -269,7 +273,7 @@ func adapterAddresses() ([]*windows.IpAdapterAddresses, error) {
 	return aas, nil
 }
 
-//主板信息
+//主板型号信息
 func GetMotherboardInfo() string {
 	var s = []struct {
 		Product string
@@ -286,12 +290,115 @@ func GetMotherboardInfo() string {
 	return str
 }
 
+type boardinfo struct {
+	Product                 string
+	Caption                 string
+	ConfigOptions           []string
+	CreationClassName       string
+	Depth                   float64
+	Description             string
+	Height                  float64
+	HostingBoard            bool
+	HotSwappable            bool
+	InstallDate             time.Time
+	Manufacturer            string
+	Model                   string
+	Name                    string
+	OtherIdentifyingInfo    string
+	PartNumber              string
+	PoweredOn               bool
+	Removable               bool
+	Replaceable             bool
+	RequirementsDescription string
+	RequiresDaughterBoard   bool
+	SerialNumber            string
+	SKU                     string
+	SlotLayout              string
+	SpecialRequirements     bool
+	Status                  string
+	Tag                     string
+	Version                 string
+	Weight                  float64
+	Width                   float64
+}
+
+//主板信息
+func GetBoardInfo() []*boardinfo {
+	var s []*boardinfo
+
+	wmi.Query("SELECT  *  FROM Win32_BaseBoard", &s) // WHERE (Product IS NOT NULL)
+
+	return s
+}
+
+type diskdriver struct {
+	//Availability                int
+	//BytesPerSector              int
+	//Capabilities           []uint16
+	CapabilityDescriptions []string
+	Caption                string
+	CompressionMethod      string
+	//ConfigManagerErrorCode      int
+	ConfigManagerUserConfig bool
+	CreationClassName       string
+	DefaultBlockSize        int64
+	Description             string
+	DeviceID                string
+	ErrorCleared            bool
+	ErrorDescription        string
+	ErrorMethodology        string
+	FirmwareRevision        string
+	//Index                   int
+	InstallDate   time.Time
+	InterfaceType string
+	//LastErrorCode               int
+	Manufacturer  string
+	MaxBlockSize  int64
+	MaxMediaSize  int64
+	MediaLoaded   bool
+	MediaType     string
+	MinBlockSize  int64
+	Model         string
+	Name          string
+	NeedsCleaning bool
+	//NumberOfMediaSupported      int
+	//Partitions                  int
+	PNPDeviceID string
+	//PowerManagementCapabilities []int
+	PowerManagementSupported bool
+	//SCSIBus                     int
+	//SCSILogicalUnit             int
+	//SCSIPort                    int
+	//SCSITargetId                int
+	//SectorsPerTrack             int
+	SerialNumber string
+	Signature    int
+	Size         int64
+	Status       string
+	//StatusInfo                  int
+	SystemCreationClassName string
+	SystemName              string
+	//TotalCylinders              int64
+	//TotalHeads                  int
+	//TotalSectors                int64
+	//TotalTracks                 int64
+	//TracksPerCylinder           int
+}
+
+//硬盘信息
+func GetDiskDriverInfo() []*diskdriver {
+	var s []*diskdriver
+
+	wmi.Query("SELECT  *  FROM Win32_DiskDrive", &s)
+	return s
+}
+
 //BIOS信息
 func GetBiosInfo() string {
 	var s = []struct {
 		Name string
 	}{}
-	err := wmi.Query("SELECT Name FROM Win32_BIOS WHERE (Name IS NOT NULL)", &s) // WHERE (BIOSVersion IS NOT NULL)
+	err := wmi.Query("SELECT Name FROM Win32_BIOS WHERE (Name IS NOT NULL)", &s)
 	if err != nil {
 		return ""
 	}
