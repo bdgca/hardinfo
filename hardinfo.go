@@ -1,4 +1,4 @@
-// GetHardInfo
+// hardinfo
 package hardinfo
 
 import (
