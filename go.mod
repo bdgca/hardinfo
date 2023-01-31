@@ -1,4 +1,4 @@
-module hardInfo
+module hardinfo
 
 go 1.18
 
