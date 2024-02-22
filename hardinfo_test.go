@@ -31,7 +31,7 @@ func TestStrLen(t *testing.T) {
 }
 
 func TestWlanInfo(t *testing.T) {
-	rst, err := WlanInfo("HUAWEI-Main")
+	rst, err := WlanInfo()
 	if err != nil {
 		t.Error(err.Error())
 	} else {

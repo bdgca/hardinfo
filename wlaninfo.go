@@ -26,8 +26,12 @@ import (
 
 ***************************************************
 */
-func WlanInfo(wifiname string) (map[string]string, error) {
-	cmd := exec.Command("netsh", "wlan", "show", "interfaces", fmt.Sprintf("name=%s", wifiname)) //列出所有任务列表
+func WlanInfo(wifiname ...string) (map[string]string, error) {
+	args := []string{"wlan", "show", "interfaces"}
+	if len(wifiname) > 0 {
+		args = append(args, fmt.Sprintf("name=%s", wifiname[0]))
+	}
+	cmd := exec.Command("netsh", args...) //列出所有任务列表
 	var stdout bytes.Buffer
 	cmd.Stdout = &stdout // 标准输出
 	err := cmd.Run()
@@ -80,7 +84,7 @@ func decodeWlanInfo(cmdoutstr string) map[string]string {
 				case "网络类型", "Network type":
 					wlaninfo["Network type"] = val
 				case "无线电类型", "Radio type":
-					wlaninfo["Network type"] = val
+					wlaninfo["Radio type"] = val
 				case "身份验证", "Authentication":
 					wlaninfo["Authentication"] = val
 				case "密码", "Cipher":
