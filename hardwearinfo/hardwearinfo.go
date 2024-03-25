@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bkzy/hardinfo"
+	"github.com/bdgca/hardinfo"
 )
 
 func main() {

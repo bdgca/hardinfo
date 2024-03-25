@@ -1,4 +1,4 @@
-module github.com/bkzy/hardinfo
+module github.com/bdgca/hardinfo
 
 go 1.18
 
